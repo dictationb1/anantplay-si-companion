@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Scoped to official AnantPlay ONLY: the system never wakes us for any other app.
+     TYPE_VIEW_TEXT_CHANGED = the subtitle TextView's cue changes (fires even with the
+     player HUD hidden — Phase 1 audit §1.2); TYPE_WINDOW_CONTENT_CHANGED = the 500 ms HUD
+     tick (clock anchors, title); TYPE_WINDOW_STATE_CHANGED = player open/close. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeViewTextChanged"
+    android:packageNames="me.champdev.weblock"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagIncludeNotImportantViews|flagReportViewIds"
+    android:canRetrieveWindowContent="true"
+    android:notificationTimeout="50"
+    android:summary="@string/service_summary"
+    android:description="@string/service_desc"/>

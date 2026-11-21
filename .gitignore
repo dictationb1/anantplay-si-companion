@@ -1,0 +1,6 @@
+build/
+dist/
+lab/out/
+*.apk
+*.keystore
+.DS_Store

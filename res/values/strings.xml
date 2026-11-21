@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AnantPlay SI Companion</string>
+    <string name="service_label">AnantPlay සිංහල උපසිරැසි (SI Companion)</string>
+    <string name="service_summary">සිංහල උපසිරැසි AnantPlay වීඩියෝ මතට දමයි · Sinhala subtitles over AnantPlay videos</string>
+    <string name="service_desc">Reads ONLY the official AnantPlay player screen (me.champdev.weblock) to detect the title and the current subtitle line, and draws a paired Sinhala subtitle overlay on top of the video. It cannot see or interact with any other app. No data leaves the device except the movie title sent to your own Sinhala-subtitle worker.</string>
+    <string name="no">No</string>
+</resources>
