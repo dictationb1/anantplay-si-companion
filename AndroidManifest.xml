@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="lk.techworld.anantplay.sicomp">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- NOTE: no SYSTEM_ALERT_WINDOW — the overlay is TYPE_ACCESSIBILITY_OVERLAY, which rides
+         on the single Accessibility grant. Android 10–16, no root, no extra toggle. -->
+
+    <!-- Package visibility (Android 11+): we only ever look at official AnantPlay. -->
+    <queries>
+        <package android:name="me.champdev.weblock"/>
+    </queries>
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/AppTheme"
+        android:allowBackup="false"
+        android:supportsRtl="true">
+
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- transparent trampoline for the emergency .srt/.zip picker -->
+        <activity android:name=".FilePickActivity" android:exported="false"
+            android:theme="@style/TransparentTheme"/>
+
+        <!-- THE scoped accessibility service: watches ONLY me.champdev.weblock
+             (res/xml/accessibility_service_config.xml), draws TYPE_ACCESSIBILITY_OVERLAY. -->
+        <service android:name=".SinhalaOverlayService"
+            android:exported="false"
+            android:label="@string/service_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config"/>
+        </service>
+    </application>
+</manifest>

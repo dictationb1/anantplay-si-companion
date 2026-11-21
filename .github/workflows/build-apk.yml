@@ -1,0 +1,77 @@
+name: Build companion APK
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lab:
+    name: Cue-Lock & Sync verification lab
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Compile the pure engines + run the lab (matcher, clock, loader, parser)
+        run: |
+          chmod +x lab/run_companion_lab.sh
+          ./lab/run_companion_lab.sh --fixtures
+          grep -E "Lab result|exact match rate|latency" lab/out/companion-lab.txt | head -5 | sed 's/^/::notice title=Sync Lab proof::/' || true
+
+      - name: Upload lab report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: companion-lab-report
+          path: lab/out/
+          if-no-files-found: ignore
+
+  apk:
+    name: APK (JDK 17 + Android SDK 34)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK (platform 34 + build-tools)
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-34" "build-tools;34.0.0" > /dev/null
+
+      - name: Build the APK (no Gradle — the same recipe AnantPlay itself uses)
+        env:
+          # optional release keystore secrets — clean debug-key fallback when unset
+          KS_BASE64: ${{ secrets.KS_BASE64 }}
+          KS_PASS: ${{ secrets.KS_PASS }}
+          KS_KEYPASS: ${{ secrets.KS_KEYPASS }}
+          KS_ALIAS: ${{ secrets.KS_ALIAS }}
+        run: |
+          chmod +x build.sh
+          ANDROID_HOME="$ANDROID_HOME" ./build.sh
+
+      - name: Verify the artifact really is a signed, installable APK
+        run: |
+          f=dist/AnantPlay-SI-Companion.apk
+          echo "artifact: $f ($(wc -c < "$f") bytes)"
+          unzip -l "$f" | grep -E "classes.dex|AndroidManifest.xml|assets/fonts|res/xml" | head -10
+          "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump badging "$f" | grep -E "package:|sdkVersion|application-label:" | head -5
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --print-certs "$f"
+          echo "apksigner verify: PASS"
+          echo "::notice title=APK build proof::AnantPlay-SI-Companion.apk = $(wc -c < "$f") bytes · apksigner verify PASS"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anantplay-si-companion-apk
+          path: dist/AnantPlay-SI-Companion.apk
