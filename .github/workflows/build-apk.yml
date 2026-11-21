@@ -24,6 +24,7 @@ jobs:
         run: |
           chmod +x lab/run_companion_lab.sh
           ./lab/run_companion_lab.sh --fixtures
+          grep -E "Lab result|exact match rate|latency" lab/out/companion-lab.txt | head -5 | sed 's/^/::notice title=Sync Lab proof::/' || true
 
       - name: Upload lab report
         if: always()
@@ -68,6 +69,7 @@ jobs:
           "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump badging "$f" | grep -E "package:|sdkVersion|application-label:" | head -5
           "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --print-certs "$f"
           echo "apksigner verify: PASS"
+          echo "::notice title=APK build proof::AnantPlay-SI-Companion.apk = $(wc -c < "$f") bytes · apksigner verify PASS"
 
       - uses: actions/upload-artifact@v4
         with:
